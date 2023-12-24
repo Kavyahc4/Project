@@ -3,34 +3,39 @@ const express = require('express');
 const formidable = require('express-formidable');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const RegisterUser = require('../model/registerSchema.js');
+const RegisterUser = require('../model/registerSchema');
 
 const registerRouter = express.Router();
 
 registerRouter.post('/', formidable(), async function (req, res) {
-    let { firstName, lastName, email, password } = req.fields;
+    try {
+        const { firstName, lastName, email, password } = req.fields;
 
-    if (!(firstName && lastName && email && password)) {
-        res.send('Provide all the inputs');
-    } else {
-        if (await RegisterUser.findOne({ email })) {
-            res.send('User already exists');
-        } else {
-            let enc_password = await bcrypt.hash(password, 10);
-            let user = await RegisterUser.create({
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: enc_password
-            });
-
-            let token = jwt.sign({ user_id: user._id, email },
-                process.env.TOKEN_KEY,
-                { expiresIn: "5h" });
-
-            user.token = token;
-            res.json(user);
+        if (!(firstName && lastName && email && password)) {
+            return res.status(400).send('Provide all the inputs');
         }
+
+        if (await RegisterUser.findOne({ email })) {
+            return res.send('User already exists');
+        }
+
+        const enc_password = await bcrypt.hash(password, 10);
+        const user = await RegisterUser.create({
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: enc_password
+        });
+
+        const token = jwt.sign({ user_id: user._id, email }, process.env.TOKEN_KEY, { expiresIn: "5h" });
+
+        user.token = token;
+        await user.save();
+
+        res.json(user);
+    } catch (error) {
+        console.error('Error in registration route:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
 

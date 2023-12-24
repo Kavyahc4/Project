@@ -2,10 +2,16 @@
 const mongoose = require('mongoose');
 
 const forgotPasswordSchema = new mongoose.Schema({
-    email: { type: String, default: '' },
-    resetPasswordToken: { type: String, default: '' },
-    resetPasswordTokenExpiry: { type: Date, default: null },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: String, // Add any other fields you need
+  resetPasswordToken: String,
+  resetPasswordTokenExpiry: Date,
 });
 
-module.exports = mongoose.model('ForgotPasswordUser', forgotPasswordSchema);
+const ForgotPasswordUser = mongoose.model('ForgotPasswordUser', forgotPasswordSchema);
 
+module.exports = ForgotPasswordUser;

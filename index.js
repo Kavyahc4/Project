@@ -1,37 +1,43 @@
-require("dotenv").config();
+
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const formidable = require('express-formidable');
-require('./config/database').connect();
-const bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
-let verifyToken = require('./middleware/authentication');
+const { connect } = require('./config/database');
+const verifyToken = require('./middleware/authentication');
+app.use(express.json());
 
-const PORT = process.env.API_PORT;
-
-
-const RegisterUser = require('./model/registerSchema.js');
-const LoginUser = require('./model/loginSchema.js');
-const ForgotPasswordUser = require('./model/forgotPasswordSchema');
-
+const PORT = process.env.API_PORT || 3000;
 
 // Import route files
-const registerRouter = require('./routes/register.js');
-const loginRouter = require('./routes/login.js');
-const forgotPasswordRouter = require('./routes/forgotpassword.js');
+const registerRouter = require('./routes/register');
+const loginRouter = require('./routes/login');
+const forgotPasswordRouter = require('./routes/forgotpassword');
+const productRouter = require('./routes/product');
+const orderRouter = require('./routes/order');
+const sellerRouter = require('./routes/seller');
+const cartRouter = require('./routes/cart');
 
-// Use middleware for parsing form data
 app.use(formidable());
 
 // Use routes
 app.use('/register', registerRouter);
 app.use('/login', loginRouter);
 app.use('/forgotpassword', forgotPasswordRouter);
+app.use('/product', productRouter);
+app.use('/cart', cartRouter);
+app.use('/order', orderRouter);
+app.use('/seller', sellerRouter);
+app.use(express.urlencoded({ extended: true }));
 
 // Define the profile route with token verification middleware
-app.get('/profile', verifyToken, function(req, res) {
-    res.send('Hello welcome to FSD');
+app.get('/profile', verifyToken, function (req, res) {
+    res.send('Hello, welcome to your profile!');
 });
 
 // Start the server
-app.listen(PORT, console.log(`Project is running at ${PORT} port`));
+connect().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server is running at http://localhost:${PORT}`);
+    });
+});

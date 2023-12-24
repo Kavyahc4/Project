@@ -1,43 +1,38 @@
 const express = require('express');
 const formidable = require('express-formidable');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const ForgotPasswordUser = require('../model/forgotPasswordSchema');
-
-
 
 const forgotPasswordRouter = express.Router();
 
 forgotPasswordRouter.post('/', formidable(), async function (req, res) {
     try {
-        let { email } = req.fields;
+        const { email } = req.fields;
 
         if (!email) {
-            return res.status(400).send('Provide email');
+            return res.status(400).send('Provide all the inputs');
         }
 
-        let user = await ForgotPasswordUser.findOne({ email });
+        const user = await ForgotPasswordUser.findOne({ email });
 
-        if (!user) {
-            return res.status(404).send('User not found');
+        if (user) {
+            // User found: Generate a reset password token
+            const resetToken = jwt.sign({ user_id: user._id, email },
+                process.env.TOKEN_KEY,
+                { expiresIn: "1h" });
+
+            // Save the reset password token and its expiry date to the user record
+            user.resetPasswordToken = resetToken;
+            user.resetPasswordTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+            await user.save();
+            return res.send('Reset password instructions sent to your email');
+        } else {
+            return res.send('User not found');
         }
-
-        // Generate a reset password token
-        let resetToken = jwt.sign({ user_id: user._id, email },
-            process.env.TOKEN_KEY,
-            { expiresIn: "1h" });
-
-        // Save the reset password token and its expiry date to the user record
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
-
-        await user.save();
-
-        // Send reset password email with the token (you need to implement this part)
-        // ...
-
-        res.send('Reset password instructions sent to your email');
     } catch (error) {
-        console.error('Error in forgotpassword route:', error);
+        console.error('Error in ForgotPasswordUser route:', error);
         res.status(500).send('Internal Server Error');
     }
 });
