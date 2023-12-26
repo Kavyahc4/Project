@@ -8,7 +8,7 @@ const Product = require('../model/productSchema');
 router.post('/place', verifyToken, async (req, res) => {
     try {
         const userId = req.user.user_id;
-        const { productId, quantity } = req.fields;
+        const { productId, quantity , address } = req.fields;
 
         if (!(productId && quantity)) {
             return res.status(400).send('Provide product ID and quantity');
@@ -46,7 +46,9 @@ router.post('/place', verifyToken, async (req, res) => {
         const order = await Order.create({
             customer: userId,
             items: [{ product: productId, quantity }],
+            dateOfPurchase: Date.now(),
             totalAmount,
+            address,
             cost: quantity * product.price
         
         });

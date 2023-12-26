@@ -24,7 +24,8 @@ registerRouter.post('/', formidable(), async function (req, res) {
             firstName: firstName,
             lastName: lastName,
             email: email,
-            password: enc_password
+            password: enc_password,
+            userType: 'customer', // or 'seller' or 'admin'
         });
 
         const token = jwt.sign({ user_id: user._id, email }, process.env.TOKEN_KEY, { expiresIn: "5h" });

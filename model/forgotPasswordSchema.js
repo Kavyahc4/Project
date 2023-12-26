@@ -7,7 +7,7 @@ const forgotPasswordSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  password: String, // Add any other fields you need
+  password: String, 
   resetPasswordToken: String,
   resetPasswordTokenExpiry: Date,
 });

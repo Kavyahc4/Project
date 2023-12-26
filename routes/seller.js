@@ -9,7 +9,6 @@ const Product = require('../model/productSchema');
 // Create a new seller
 router.post('/sellers',formidable(), async (req, res) => {
     try {
-        // You may add additional checks or validations if needed
 
         const {name ,products} = req.fields;
 

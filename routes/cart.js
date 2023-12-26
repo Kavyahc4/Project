@@ -26,8 +26,10 @@ router.post('/add', verifyToken, async (req, res) => {
             const newCart = new Cart({
                 user: userId,
                 items: [{ product: productId, quantity }],
+                
             });
             await newCart.save();
+            
         } else {
             // Update the existing cart
             const existingItem = userCart.items.find(item => item.product.equals(productId));
