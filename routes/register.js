@@ -32,7 +32,7 @@ registerRouter.post('/', formidable(), async function (req, res) {
 
         user.token = token;
         await user.save();
-
+        console.log('User registered successfully:', user);
         res.json(user);
     } catch (error) {
         console.error('Error in registration route:', error);

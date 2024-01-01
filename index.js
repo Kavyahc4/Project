@@ -5,8 +5,12 @@ const formidable = require('express-formidable');
 const { connect } = require('./config/database');
 const verifyToken = require('./middleware/authentication');
 app.use(express.json());
+const cors = require('cors');
+// ...
+app.use(cors());
 
-const PORT = process.env.API_PORT || 3000;
+
+const PORT = process.env.API_PORT || 3001;
 
 // Import route files
 const registerRouter = require('./routes/register');
